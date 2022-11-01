@@ -20,13 +20,13 @@ class Pacman:
         self.vel_y = 0
         self.raio = self.tamanho // 2
 
-    def calcular_regras(self):
+    def calculate_rules(self):
         self.coluna = self.coluna + self.vel_x
         self.linha = self.linha + self.vel_y
         self.centro_x = int(self.coluna * (self.tamanho + self.raio))
         self.centro_y = int(self.linha * (self.tamanho + self.raio))
 
-    def pintar(self, tela):
+    def paint(self, tela):
         #Draw pacman's body
         pygame.draw.circle(tela, vermelho, (self.centro_x, self.centro_y), self.raio)
 
@@ -71,11 +71,11 @@ if __name__ == "__main__":
 
     while True:
         #Calculate rules
-        pacman.calcular_regras()
+        pacman.calculate_rules()
 
         #Draw screen
         screen.fill(preto)
-        pacman.pintar(screen)
+        pacman.paint(screen)
         pygame.display.update()
         pygame.time.delay(100)
 
