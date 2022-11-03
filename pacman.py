@@ -11,7 +11,8 @@ blue = (0,0,255)
 velocidade = 1
 
 class Cenario:
-    def __init__(self, tamanho):
+    def __init__(self, tamanho, pac):
+        self.pacman = pac
         self.tamanho = tamanho
         self.matriz = [
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
@@ -61,6 +62,14 @@ class Cenario:
         for line_number, line in enumerate(self.matriz):
             self.paint_line(tela, line_number, line)
 
+    def calculate_rules(self):
+        col = self.pacman.column_intention
+        lin = self.pacman.line_intention
+        if 0 <= col < 28 and 0 <= lin < 29:
+            if self.matriz[lin][col] != 2:
+                self.pacman.accept_move()
+
+
 class Pacman:
     def __init__(self, tamanho):
         self.column = 1
@@ -71,12 +80,14 @@ class Pacman:
         self.vel_x = 0
         self.vel_y = 0
         self.raio = self.tamanho // 2
+        self.column_intention = self.column
+        self.line_intention = self.line
 
     def calculate_rules(self):
-        self.column = self.column + self.vel_x
-        self.line = self.line + self.vel_y
-        self.centro_x = int(self.column * (self.tamanho + self.raio))
-        self.centro_y = int(self.line * (self.tamanho + self.raio))
+        self.column_intention = self.column + self.vel_x
+        self.line_intention = self.line + self.vel_y
+        self.centro_x = int(self.column * self.tamanho + self.raio)
+        self.centro_y = int(self.line * self.tamanho + self.raio)
 
     def paint(self, tela):
         #Draw pacman's body
@@ -125,14 +136,19 @@ class Pacman:
                 self.column = (mouse_x - self.centro_x) / delay
                 self.line = (mouse_y - self.centro_y) / delay
 
+    def accept_move(self):
+        self.line = self.line_intention
+        self.column = self.column_intention
+
 if __name__ == "__main__":
     size = 600 // 30
     pacman = Pacman(size)
-    cenario = Cenario(size)
+    cenario = Cenario(size, pacman)
 
     while True:
         #Calculate rules
         pacman.calculate_rules()
+        cenario.calculate_rules()
 
         #Draw screen
         screen.fill(black)
