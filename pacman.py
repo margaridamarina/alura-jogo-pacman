@@ -49,19 +49,22 @@ class Cenario:
         for column_number, column in enumerate(line):
             x = column_number * self.tamanho
             y = line_number * self.tamanho
-            pygame.draw.rect(tela, blue, (x, y, self.tamanho, self.tamanho), 0)
+            color = black
+            if column == 2:
+                color = blue
+            pygame.draw.rect(tela, color, (x, y, self.tamanho, self.tamanho), 0)
     
     def paint(self, tela):
         for line_number, line in enumerate(self.matriz):
             self.paint_line(tela, line_number, line)
 
 class Pacman:
-    def __init__(self):
+    def __init__(self, tamanho):
         self.column = 1
         self.line = 1
         self.centro_x = 400
         self.centro_y = 300
-        self.tamanho = 800 // 30
+        self.tamanho = tamanho
         self.vel_x = 0
         self.vel_y = 0
         self.raio = self.tamanho // 2
@@ -120,8 +123,9 @@ class Pacman:
                 self.line = (mouse_y - self.centro_y) / delay
 
 if __name__ == "__main__":
-    pacman = Pacman()
-    cenario = Cenario(600 // 30)
+    size = 600 // 30
+    pacman = Pacman(size)
+    cenario = Cenario(size)
 
     while True:
         #Calculate rules
@@ -139,4 +143,4 @@ if __name__ == "__main__":
         for e in events:
             if e.type == pygame.QUIT:
                 exit()
-        pacman.process_mouse_events(events)
+        pacman.process_events(events)
