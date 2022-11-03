@@ -49,10 +49,13 @@ class Cenario:
         for column_number, column in enumerate(line):
             x = column_number * self.tamanho
             y = line_number * self.tamanho
+            half = self.tamanho // 2
             color = black
             if column == 2:
                 color = blue
             pygame.draw.rect(tela, color, (x, y, self.tamanho, self.tamanho), 0)
+            if column == 1:
+                pygame.draw.circle(tela, red, (x + half, y + half), self.tamanho // 10, 0)
     
     def paint(self, tela):
         for line_number, line in enumerate(self.matriz):
