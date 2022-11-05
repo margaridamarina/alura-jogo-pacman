@@ -4,6 +4,7 @@ import pygame
 pygame.init()
 
 screen = pygame.display.set_mode((800, 600), 0)
+fonte = pygame.font.SysFont("arial", 24, True, False)
 
 red = (255,0,0)
 black = (0,0,0)
@@ -47,6 +48,11 @@ class Cenario:
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
         ]
 
+    def paint_points(self, tela):
+        points_x = 30 * self.tamanho
+        img_points = fonte.render(f"Score: {self.points}", True, red)
+        tela.blit(img_points, (points_x, 50))
+
     def paint_line(self, tela, line_number, line):
         for column_number, column in enumerate(line):
             x = column_number * self.tamanho
@@ -62,6 +68,7 @@ class Cenario:
     def paint(self, tela):
         for line_number, line in enumerate(self.matriz):
             self.paint_line(tela, line_number, line)
+        self.paint_points(tela)
 
     def calculate_rules(self):
         col = self.pacman.column_intention
@@ -72,7 +79,6 @@ class Cenario:
                 if self.matriz[lin][col] == 1:
                     self.points += 1
                     self.matriz[lin][col] = 0
-                    print(self.points)
 
 
 class Pacman:
