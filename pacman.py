@@ -7,9 +7,11 @@ pygame.init()
 screen = pygame.display.set_mode((800, 600), 0)
 fonte = pygame.font.SysFont("arial", 24, True, False)
 
+yellow = (255,255,0)
 red = (255,0,0)
 black = (0,0,0)
 blue = (0,0,255)
+white = (255,255,255)
 velocidade = 1
 
 class ElementoJogo(metaclass=ABCMeta):
@@ -99,7 +101,6 @@ class Cenario(ElementoJogo):
             if e.type == pygame.QUIT:
                 exit()
 
-
 class Pacman(ElementoJogo):
     def __init__(self, tamanho):
         self.column = 1
@@ -170,9 +171,52 @@ class Pacman(ElementoJogo):
         self.line = self.line_intention
         self.column = self.column_intention
 
+class Fantasma(ElementoJogo):
+    def __init__(self, cor, tamanho):
+        self.coluna = 6.0
+        self.linha = 8.0
+        self.tamanho = tamanho
+        self.cor = cor
+
+    def paint(self, tela):
+        fatia = self.tamanho // 8
+        px = int(self.coluna * self.tamanho)
+        py = int(self.linha * self.tamanho)
+        contorno = [(px, py + self.tamanho), 
+                    (px + fatia, py + fatia * 2),
+                    (px + fatia * 2, py + fatia // 2),
+                    (px + fatia * 3, py),
+                    (px + fatia * 5, py),
+                    (px + fatia * 6, py + fatia // 2),
+                    (px + fatia * 7, py + fatia * 2),
+                    (px + self.tamanho, py + self.tamanho)]
+        pygame.draw.polygon(tela, self.cor, contorno, 0)
+
+        olho_raio_ext = fatia
+        olho_raio_int = fatia // 2
+
+        olho_esq_x = int(px + fatia * 2.5)
+        olho_esq_y = int(py + fatia * 2.5)
+
+        olho_dir_x = int(px + fatia * 5.5)
+        olho_dir_y = int(py + fatia * 2.5)
+
+        pygame.draw.circle(tela, white, (olho_esq_x, olho_esq_y), olho_raio_ext, 0)
+        pygame.draw.circle(tela, black, (olho_esq_x, olho_esq_y), olho_raio_int, 0)
+        pygame.draw.circle(tela, white, (olho_dir_x, olho_dir_y), olho_raio_ext, 0)
+        pygame.draw.circle(tela, black, (olho_dir_x, olho_dir_y), olho_raio_int, 0)
+
+
+    def calculate_rules(self):
+        pass
+
+    def process_events(self, events):
+        pass
+
 if __name__ == "__main__":
     size = 600 // 30
     pacman = Pacman(size)
+    blinky = Fantasma(red, size)
     cenario = Cenario(size, pacman)
 
     while True:
@@ -184,6 +228,7 @@ if __name__ == "__main__":
         screen.fill(black)
         cenario.paint(screen)
         pacman.paint(screen)
+        blinky.paint(screen)
         pygame.display.update()
         pygame.time.delay(100)
 
