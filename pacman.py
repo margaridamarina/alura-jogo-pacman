@@ -1,5 +1,6 @@
-from struct import pack
 import pygame
+from abc import ABCMeta, abstractmethod
+
 
 pygame.init()
 
@@ -11,7 +12,20 @@ black = (0,0,0)
 blue = (0,0,255)
 velocidade = 1
 
-class Cenario:
+class ElementoJogo(metaclass=ABCMeta):
+    @abstractmethod
+    def paint(self, tela):
+        pass
+
+    @abstractmethod
+    def calculate_rules(self):
+        pass
+
+    @abstractmethod
+    def process_events(self, events):
+        pass
+
+class Cenario(ElementoJogo):
     def __init__(self, tamanho, pac):
         self.pacman = pac
         self.tamanho = tamanho
@@ -80,8 +94,13 @@ class Cenario:
                     self.points += 1
                     self.matriz[lin][col] = 0
 
+    def process_events(self, evts):
+        for e in evts:
+            if e.type == pygame.QUIT:
+                exit()
 
-class Pacman:
+
+class Pacman(ElementoJogo):
     def __init__(self, tamanho):
         self.column = 1
         self.line = 1
@@ -170,7 +189,5 @@ if __name__ == "__main__":
 
         #Capture events
         events = pygame.event.get()
-        for e in events:
-            if e.type == pygame.QUIT:
-                exit()
         pacman.process_events(events)
+        cenario.process_events(events)
