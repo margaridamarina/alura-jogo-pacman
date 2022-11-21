@@ -1,5 +1,6 @@
-import pygame
+import pygame, random
 from abc import ABCMeta, abstractmethod
+
 
 
 pygame.init()
@@ -105,6 +106,8 @@ class Cenario(ElementoJogo):
 
     def calculate_rules(self):
         direcoes = self.get_directions(self.fantasma.linha, self.fantasma.coluna)
+        if len(direcoes) >= 3:
+            self.fantasma.esquina(direcoes)
         print(direcoes)
         col = self.pacman.column_intention
         lin = self.pacman.line_intention
@@ -193,7 +196,9 @@ class Pacman(ElementoJogo):
 class Fantasma(ElementoJogo):
     def __init__(self, cor, tamanho):
         self.coluna = 6.0
-        self.linha = 8.0
+        self.linha = 2.0
+        self.velocidade = 1
+        self.direcao = abaixo
         self.tamanho = tamanho
         self.cor = cor
 
@@ -227,7 +232,17 @@ class Fantasma(ElementoJogo):
 
 
     def calculate_rules(self):
-        pass
+        if self.direcao == acima:
+            self.linha -= self.velocidade
+        if self.direcao == abaixo:
+            self.linha += self.velocidade
+        if self.direcao == esquerda:
+            self.linha -= self.velocidade
+        if self.direcao == direita:
+            self.linha += self.velocidade
+
+    def esquina(self, direcoes):
+        self.direcao = random.choice(direcoes)
 
     def process_events(self, events):
         pass
@@ -242,6 +257,7 @@ if __name__ == "__main__":
         #Calculate rules
         pacman.calculate_rules()
         cenario.calculate_rules()
+        blinky.calculate_rules()
 
         #Draw screen
         screen.fill(black)
