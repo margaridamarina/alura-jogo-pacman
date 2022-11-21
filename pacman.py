@@ -13,6 +13,10 @@ black = (0,0,0)
 blue = (0,0,255)
 white = (255,255,255)
 velocidade = 1
+acima = 1
+abaixo = 2
+direita = 3
+esquerda = 4
 
 class ElementoJogo(metaclass=ABCMeta):
     @abstractmethod
@@ -28,8 +32,9 @@ class ElementoJogo(metaclass=ABCMeta):
         pass
 
 class Cenario(ElementoJogo):
-    def __init__(self, tamanho, pac):
+    def __init__(self, tamanho, pac, fan):
         self.pacman = pac
+        self.fantasma = fan
         self.tamanho = tamanho
         self.points = 0
         self.matriz = [
@@ -86,7 +91,21 @@ class Cenario(ElementoJogo):
             self.paint_line(tela, line_number, line)
         self.paint_points(tela)
 
+    def get_directions(self, linha, coluna):
+        direcoes = []
+        if self.matriz[int(linha - 1)][int(coluna)] != 2:
+            direcoes.append(acima)
+        if self.matriz[int(linha + 1)][int(coluna)] != 2:
+            direcoes.append(abaixo)
+        if self.matriz[int(linha)][int(coluna - 1)] != 2:
+            direcoes.append(esquerda)
+        if self.matriz[int(linha)][int(coluna + 1)] != 2:
+            direcoes.append(direita)
+        return direcoes
+
     def calculate_rules(self):
+        direcoes = self.get_directions(self.fantasma.linha, self.fantasma.coluna)
+        print(direcoes)
         col = self.pacman.column_intention
         lin = self.pacman.line_intention
         if 0 <= col < 28 and 0 <= lin < 29:
@@ -217,7 +236,7 @@ if __name__ == "__main__":
     size = 600 // 30
     pacman = Pacman(size)
     blinky = Fantasma(red, size)
-    cenario = Cenario(size, pacman)
+    cenario = Cenario(size, pacman, blinky)
 
     while True:
         #Calculate rules
