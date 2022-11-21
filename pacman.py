@@ -108,7 +108,7 @@ class Cenario(ElementoJogo):
         direcoes = self.get_directions(self.fantasma.linha, self.fantasma.coluna)
         if len(direcoes) >= 3:
             self.fantasma.esquina(direcoes)
-        print(direcoes)
+        # print("DIREÇÕES POSSÍVEIS: ", direcoes)
         col = self.pacman.column_intention
         lin = self.pacman.line_intention
         if 0 <= col < 28 and 0 <= lin < 29:
@@ -117,6 +117,14 @@ class Cenario(ElementoJogo):
                 if self.matriz[lin][col] == 1:
                     self.points += 1
                     self.matriz[lin][col] = 0
+                    print(self.points)
+
+        col = int(self.fantasma.coluna_intencao) 
+        lin = int(self.fantasma.linha_intencao)
+        if 0 <= col < 28 and 0 <= lin < 29 and self.matriz[lin][col] != 2:
+            self.fantasma.accept_move()
+        else:
+            self.fantasma.refuse_move(direcoes)
 
     def process_events(self, evts):
         for e in evts:
@@ -197,6 +205,8 @@ class Fantasma(ElementoJogo):
     def __init__(self, cor, tamanho):
         self.coluna = 6.0
         self.linha = 2.0
+        self.linha_intencao = self.linha
+        self.coluna_intencao = self.coluna
         self.velocidade = 1
         self.direcao = abaixo
         self.tamanho = tamanho
@@ -233,16 +243,28 @@ class Fantasma(ElementoJogo):
 
     def calculate_rules(self):
         if self.direcao == acima:
-            self.linha -= self.velocidade
+            self.linha_intencao -= self.velocidade
         if self.direcao == abaixo:
-            self.linha += self.velocidade
+            self.linha_intencao += self.velocidade
         if self.direcao == esquerda:
-            self.linha -= self.velocidade
+            self.coluna_intencao -= self.velocidade
         if self.direcao == direita:
-            self.linha += self.velocidade
+            self.coluna_intencao += self.velocidade
+
+    def mudar_direcao(self, direcoes):
+        self.direcao = random.choice(direcoes)
 
     def esquina(self, direcoes):
-        self.direcao = random.choice(direcoes)
+        self.mudar_direcao(direcoes)
+
+    def accept_move(self):
+        self.linha = self.linha_intencao
+        self.coluna = self.coluna_intencao
+
+    def refuse_move(self, direcoes):
+        self.linha_intencao = self.linha
+        self.coluna_intencao = self.coluna
+        self.mudar_direcao(direcoes)
 
     def process_events(self, events):
         pass
