@@ -13,11 +13,11 @@ red = (255,0,0)
 black = (0,0,0)
 blue = (0,0,255)
 white = (255,255,255)
-velocidade = 1
-acima = 1
-abaixo = 2
-direita = 3
-esquerda = 4
+speed = 1
+up = 1
+down = 2
+right = 3
+left = 4
 
 class ElementoJogo(metaclass=ABCMeta):
     @abstractmethod
@@ -39,11 +39,11 @@ class Movivel(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def refuse_move(self, direcoes):
+    def refuse_move(self, directions):
         pass
 
     @abstractmethod
-    def esquina(self, direcoes):
+    def corner(self, directions):
         pass
 
 
@@ -88,7 +88,7 @@ class Cenario(ElementoJogo):
 
     def paint_points(self, tela):
         points_x = 30 * self.tamanho
-        img_points = fonte.render(f"Score: {self.points}", True, red)
+        img_points = fonte.render(f"Scolore: {self.points}", True, red)
         tela.blit(img_points, (points_x, 50))
 
     def paint_line(self, tela, line_number, line):
@@ -108,31 +108,31 @@ class Cenario(ElementoJogo):
             self.paint_line(tela, line_number, line)
         self.paint_points(tela)
 
-    def get_directions(self, linha, coluna):
-        direcoes = []
-        if self.matriz[int(linha - 1)][int(coluna)] != 2:
-            direcoes.append(acima)
-        if self.matriz[int(linha + 1)][int(coluna)] != 2:
-            direcoes.append(abaixo)
-        if self.matriz[int(linha)][int(coluna - 1)] != 2:
-            direcoes.append(esquerda)
-        if self.matriz[int(linha)][int(coluna + 1)] != 2:
-            direcoes.append(direita)
-        return direcoes
+    def get_directions(self, line, column):
+        directions = []
+        if self.matriz[int(line - 1)][int(column)] != 2:
+            directions.append(up)
+        if self.matriz[int(line + 1)][int(column)] != 2:
+            directions.append(down)
+        if self.matriz[int(line)][int(column - 1)] != 2:
+            directions.append(left)
+        if self.matriz[int(line)][int(column + 1)] != 2:
+            directions.append(right)
+        return directions
 
     def calculate_rules(self):
-        for movivel in self.moviveis:
-            lin = int(movivel.linha)
-            col = int(movivel.coluna)
-            lin_intencao = int(movivel.linha_intencao)
-            col_intencao = int(movivel.coluna_intencao)
-            direcoes = self.get_directions(lin, col)
-            if len(direcoes) >= 3:
-                movivel.esquina(direcoes)
-            if 0 <= col_intencao < 28 and 0 <= lin_intencao < 29 and self.matriz[lin_intencao][col_intencao] != 2:
-                movivel.accept_move()
+        for movable in self.moviveis:
+            lin = int(movable.line)
+            col = int(movable.column)
+            lin_intention = int(movable.line_intention)
+            col_intention = int(movable.column_intention)
+            directions = self.get_directions(lin, col)
+            if len(directions) >= 3:
+                movable.corner(directions)
+            if 0 <= col_intention < 28 and 0 <= lin_intention < 29 and self.matriz[lin_intention][col_intention] != 2:
+                movable.accept_move()
             else: 
-                movivel.refuse_move()
+                movable.refuse_move(directions)
 
     def process_events(self, evts):
         for e in evts:
@@ -144,50 +144,50 @@ class Pacman(ElementoJogo, Movivel):
     def __init__(self, tamanho):
         self.column = 1
         self.line = 1
-        self.centro_x = 400
-        self.centro_y = 300
+        self.center_x = 400
+        self.center_y = 300
         self.tamanho = tamanho
         self.vel_x = 0
         self.vel_y = 0
-        self.raio = self.tamanho // 2
+        self.radius = self.tamanho // 2
         self.column_intention = self.column
         self.line_intention = self.line
 
     def calculate_rules(self):
         self.column_intention = self.column + self.vel_x
         self.line_intention = self.line + self.vel_y
-        self.centro_x = int(self.column * self.tamanho + self.raio)
-        self.centro_y = int(self.line * self.tamanho + self.raio)
+        self.center_x = int(self.column * self.tamanho + self.radius)
+        self.center_y = int(self.line * self.tamanho + self.radius)
 
     def paint(self, tela):
         #Draw pacman's body
-        pygame.draw.circle(tela, red, (self.centro_x, self.centro_y), self.raio)
+        pygame.draw.circle(tela, red, (self.center_x, self.center_y), self.radius)
 
         #Draw pacman's mouth
-        canto_boca = (self.centro_x, self.centro_y)
-        labio_superior = (self.centro_x + self.raio, self.centro_y - self.raio)
-        labio_inferior = (self.centro_x + self.raio, self.centro_y)
+        canto_boca = (self.center_x, self.center_y)
+        labio_superior = (self.center_x + self.radius, self.center_y - self.radius)
+        labio_inferior = (self.center_x + self.radius, self.center_y)
         pontos = [canto_boca, labio_superior, labio_inferior]
         pygame.draw.polygon(tela, black, pontos, 0)
 
         #Draw pacman's eye
-        olho_x = int(self.centro_x + self.raio / 4)
-        olho_y = int(self.centro_y - self.raio * 0.6)
-        olho_raio = int(self.raio/10)
-        pygame.draw.circle(tela, black, (olho_x, olho_y), olho_raio, 0)
+        eye_x = int(self.center_x + self.radius / 4)
+        eye_y = int(self.center_y - self.radius * 0.6)
+        eye_radius = int(self.radius/10)
+        pygame.draw.circle(tela, black, (eye_x, eye_y), eye_radius, 0)
 
     def process_events(self, events):
         #Capture events
         for e in events:
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_RIGHT:
-                    self.vel_x = velocidade
+                    self.vel_x = speed
                 elif e.key == pygame.K_LEFT:
-                    self.vel_x = -velocidade
+                    self.vel_x = -speed
                 elif e.key == pygame.K_UP:
-                    self.vel_y = -velocidade
+                    self.vel_y = -speed
                 elif e.key == pygame.K_DOWN:
-                    self.vel_y = velocidade
+                    self.vel_y = speed
             elif e.type == pygame.KEYUP:
                 if e.key == pygame.K_RIGHT:
                     self.vel_x = 0
@@ -203,85 +203,85 @@ class Pacman(ElementoJogo, Movivel):
         for e in events:
             if e.type == pygame.MOUSEMOTION:
                 mouse_x, mouse_y = e.pos
-                self.column = (mouse_x - self.centro_x) / delay
-                self.line = (mouse_y - self.centro_y) / delay
+                self.column = (mouse_x - self.center_x) / delay
+                self.line = (mouse_y - self.center_y) / delay
 
     def accept_move(self):
         self.line = self.line_intention
         self.column = self.column_intention
 
-    def refuse_move(self, direcoes):
+    def refuse_move(self, directions):
         self.line_intention = self.line
         self.column_intention = self.column   
 
-    def esquina(self, direcoes):
+    def corner(self, directions):
         pass
 
 
 class Fantasma(ElementoJogo):
-    def __init__(self, cor, tamanho):
-        self.coluna = 6.0
-        self.linha = 2.0
-        self.linha_intencao = self.linha
-        self.coluna_intencao = self.coluna
-        self.velocidade = 1
-        self.direcao = abaixo
+    def __init__(self, color, tamanho):
+        self.column = 6.0
+        self.line = 2.0
+        self.line_intention = self.line
+        self.column_intention = self.column
+        self.speed = 1
+        self.direction = down
         self.tamanho = tamanho
-        self.cor = cor
+        self.color = color
 
     def paint(self, tela):
-        fatia = self.tamanho // 8
-        px = int(self.coluna * self.tamanho)
-        py = int(self.linha * self.tamanho)
+        slice = self.tamanho // 8
+        px = int(self.column * self.tamanho)
+        py = int(self.line * self.tamanho)
         contorno = [(px, py + self.tamanho), 
-                    (px + fatia, py + fatia * 2),
-                    (px + fatia * 2, py + fatia // 2),
-                    (px + fatia * 3, py),
-                    (px + fatia * 5, py),
-                    (px + fatia * 6, py + fatia // 2),
-                    (px + fatia * 7, py + fatia * 2),
+                    (px + slice, py + slice * 2),
+                    (px + slice * 2, py + slice // 2),
+                    (px + slice * 3, py),
+                    (px + slice * 5, py),
+                    (px + slice * 6, py + slice // 2),
+                    (px + slice * 7, py + slice * 2),
                     (px + self.tamanho, py + self.tamanho)]
-        pygame.draw.polygon(tela, self.cor, contorno, 0)
+        pygame.draw.polygon(tela, self.color, contorno, 0)
 
-        olho_raio_ext = fatia
-        olho_raio_int = fatia // 2
+        eye_radius_ext = slice
+        eye_radius_int = slice // 2
 
-        olho_esq_x = int(px + fatia * 2.5)
-        olho_esq_y = int(py + fatia * 2.5)
+        eye_esq_x = int(px + slice * 2.5)
+        eye_esq_y = int(py + slice * 2.5)
 
-        olho_dir_x = int(px + fatia * 5.5)
-        olho_dir_y = int(py + fatia * 2.5)
+        eye_dir_x = int(px + slice * 5.5)
+        eye_dir_y = int(py + slice * 2.5)
 
-        pygame.draw.circle(tela, white, (olho_esq_x, olho_esq_y), olho_raio_ext, 0)
-        pygame.draw.circle(tela, black, (olho_esq_x, olho_esq_y), olho_raio_int, 0)
-        pygame.draw.circle(tela, white, (olho_dir_x, olho_dir_y), olho_raio_ext, 0)
-        pygame.draw.circle(tela, black, (olho_dir_x, olho_dir_y), olho_raio_int, 0)
+        pygame.draw.circle(tela, white, (eye_esq_x, eye_esq_y), eye_radius_ext, 0)
+        pygame.draw.circle(tela, black, (eye_esq_x, eye_esq_y), eye_radius_int, 0)
+        pygame.draw.circle(tela, white, (eye_dir_x, eye_dir_y), eye_radius_ext, 0)
+        pygame.draw.circle(tela, black, (eye_dir_x, eye_dir_y), eye_radius_int, 0)
 
 
     def calculate_rules(self):
-        if self.direcao == acima:
-            self.linha_intencao -= self.velocidade
-        if self.direcao == abaixo:
-            self.linha_intencao += self.velocidade
-        if self.direcao == esquerda:
-            self.coluna_intencao -= self.velocidade
-        if self.direcao == direita:
-            self.coluna_intencao += self.velocidade
+        if self.direction == up:
+            self.line_intention -= self.speed
+        if self.direction == down:
+            self.line_intention += self.speed
+        if self.direction == left:
+            self.column_intention -= self.speed
+        if self.direction == right:
+            self.column_intention += self.speed
 
-    def mudar_direcao(self, direcoes):
-        self.direcao = random.choice(direcoes)
+    def mudar_direction(self, directions):
+        self.direction = random.choice(directions)
 
-    def esquina(self, direcoes):
-        self.mudar_direcao(direcoes)
+    def corner(self, directions):
+        self.mudar_direction(directions)
 
     def accept_move(self):
-        self.linha = self.linha_intencao
-        self.coluna = self.coluna_intencao
+        self.line = self.line_intention
+        self.column = self.column_intention
 
-    def refuse_move(self, direcoes):
-        self.linha_intencao = self.linha
-        self.coluna_intencao = self.coluna
-        self.mudar_direcao(direcoes)
+    def refuse_move(self, directions):
+        self.line_intention = self.line
+        self.column_intention = self.column
+        self.mudar_direction(directions)
 
     def process_events(self, events):
         pass
