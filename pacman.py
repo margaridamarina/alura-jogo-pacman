@@ -93,7 +93,7 @@ class Cenario(ElementoJogo):
 
     def paint_points(self, tela):
         points_x = 30 * self.tamanho
-        img_points = fonte.render(f"Scolore: {self.points}", True, red)
+        img_points = fonte.render(f"Score: {self.points}", True, red)
         tela.blit(img_points, (points_x, 50))
 
     def paint_line(self, tela, line_number, line):
@@ -136,6 +136,10 @@ class Cenario(ElementoJogo):
                 movable.corner(directions)
             if 0 <= col_intention < 28 and 0 <= lin_intention < 29 and self.matriz[lin_intention][col_intention] != 2:
                 movable.accept_move()
+                if isinstance(movable, Pacman) and self.matriz[lin][col] == 1:
+                    self.points += 1
+                    self.matriz[lin][col] = 0
+
             else: 
                 movable.refuse_move(directions)
 
