@@ -32,10 +32,26 @@ class ElementoJogo(metaclass=ABCMeta):
     def process_events(self, events):
         pass
 
+
+class Movivel(metaclass=ABCMeta):
+    @abstractmethod
+    def accept_move(self):
+        pass
+
+    @abstractmethod
+    def refuse_move(self, direcoes):
+        pass
+
+    @abstractmethod
+    def esquina(self, direcoes):
+        pass
+
+
 class Cenario(ElementoJogo):
     def __init__(self, tamanho, pac, fan):
         self.pacman = pac
         self.fantasma = fan
+        self.moviveis = [pac, fan]
         self.tamanho = tamanho
         self.points = 0
         self.matriz = [
@@ -105,33 +121,26 @@ class Cenario(ElementoJogo):
         return direcoes
 
     def calculate_rules(self):
-        direcoes = self.get_directions(self.fantasma.linha, self.fantasma.coluna)
-        if len(direcoes) >= 3:
-            self.fantasma.esquina(direcoes)
-        # print("DIREÇÕES POSSÍVEIS: ", direcoes)
-        col = self.pacman.column_intention
-        lin = self.pacman.line_intention
-        if 0 <= col < 28 and 0 <= lin < 29:
-            if self.matriz[lin][col] != 2:
-                self.pacman.accept_move() 
-                if self.matriz[lin][col] == 1:
-                    self.points += 1
-                    self.matriz[lin][col] = 0
-                    print(self.points)
-
-        col = int(self.fantasma.coluna_intencao) 
-        lin = int(self.fantasma.linha_intencao)
-        if 0 <= col < 28 and 0 <= lin < 29 and self.matriz[lin][col] != 2:
-            self.fantasma.accept_move()
-        else:
-            self.fantasma.refuse_move(direcoes)
+        for movivel in self.moviveis:
+            lin = int(movivel.linha)
+            col = int(movivel.coluna)
+            lin_intencao = int(movivel.linha_intencao)
+            col_intencao = int(movivel.coluna_intencao)
+            direcoes = self.get_directions(lin, col)
+            if len(direcoes) >= 3:
+                movivel.esquina(direcoes)
+            if 0 <= col_intencao < 28 and 0 <= lin_intencao < 29 and self.matriz[lin_intencao][col_intencao] != 2:
+                movivel.accept_move()
+            else: 
+                movivel.refuse_move()
 
     def process_events(self, evts):
         for e in evts:
             if e.type == pygame.QUIT:
                 exit()
 
-class Pacman(ElementoJogo):
+
+class Pacman(ElementoJogo, Movivel):
     def __init__(self, tamanho):
         self.column = 1
         self.line = 1
@@ -200,6 +209,14 @@ class Pacman(ElementoJogo):
     def accept_move(self):
         self.line = self.line_intention
         self.column = self.column_intention
+
+    def refuse_move(self, direcoes):
+        self.line_intention = self.line
+        self.column_intention = self.column   
+
+    def esquina(self, direcoes):
+        pass
+
 
 class Fantasma(ElementoJogo):
     def __init__(self, cor, tamanho):
