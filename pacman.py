@@ -13,6 +13,9 @@ red = (255,0,0)
 black = (0,0,0)
 blue = (0,0,255)
 white = (255,255,255)
+cyan = (0,255,255)
+orange = (255,140,0)
+pink = (255,15,192)
 speed = 1
 up = 1
 down = 2
@@ -48,10 +51,9 @@ class Movivel(metaclass=ABCMeta):
 
 
 class Cenario(ElementoJogo):
-    def __init__(self, tamanho, pac, fan):
+    def __init__(self, tamanho, pac):
         self.pacman = pac
-        self.fantasma = fan
-        self.moviveis = [pac, fan]
+        self.movables = []
         self.tamanho = tamanho
         self.points = 0
         self.matriz = [
@@ -85,6 +87,9 @@ class Cenario(ElementoJogo):
             [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
         ]
+
+    def add_movable(self, obj):
+        self.movables.append(obj)
 
     def paint_points(self, tela):
         points_x = 30 * self.tamanho
@@ -121,7 +126,7 @@ class Cenario(ElementoJogo):
         return directions
 
     def calculate_rules(self):
-        for movable in self.moviveis:
+        for movable in self.movables:
             lin = int(movable.line)
             col = int(movable.column)
             lin_intention = int(movable.line_intention)
@@ -218,7 +223,7 @@ class Pacman(ElementoJogo, Movivel):
         pass
 
 
-class Fantasma(ElementoJogo):
+class Ghost(ElementoJogo):
     def __init__(self, color, tamanho):
         self.column = 6.0
         self.line = 2.0
@@ -289,20 +294,36 @@ class Fantasma(ElementoJogo):
 if __name__ == "__main__":
     size = 600 // 30
     pacman = Pacman(size)
-    blinky = Fantasma(red, size)
-    cenario = Cenario(size, pacman, blinky)
+    blinky = Ghost(red, size)
+    inky = Ghost(cyan, size)
+    clyde = Ghost(orange, size)
+    pinky = Ghost(pink, size)
+    cenario = Cenario(size, pacman)
+    cenario.add_movable(pacman)
+    cenario.add_movable(blinky)
+    cenario.add_movable(inky)
+    cenario.add_movable(clyde)
+    cenario.add_movable(pinky)
+
 
     while True:
         #Calculate rules
         pacman.calculate_rules()
         cenario.calculate_rules()
         blinky.calculate_rules()
+        inky.calculate_rules()
+        clyde.calculate_rules()
+        pinky.calculate_rules()
+
 
         #Draw screen
         screen.fill(black)
         cenario.paint(screen)
         pacman.paint(screen)
         blinky.paint(screen)
+        inky.paint(screen)
+        clyde.paint(screen)
+        pinky.paint(screen)
         pygame.display.update()
         pygame.time.delay(100)
 
