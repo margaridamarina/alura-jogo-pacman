@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 pygame.init()
 
 screen = pygame.display.set_mode((800, 600), 0)
-fonte = pygame.font.SysFont("arial", 24, True, False)
+font = pygame.font.SysFont("arial", 24, True, False)
 
 yellow = (255,255,0)
 red = (255,0,0)
@@ -56,6 +56,8 @@ class Cenario(ElementoJogo):
         self.movables = []
         self.tamanho = tamanho
         self.points = 0
+        self.state = 0
+        #0-Playing 1-Paused 2-GameOver 3-Win
         self.matriz = [
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
             [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
@@ -93,7 +95,7 @@ class Cenario(ElementoJogo):
 
     def paint_points(self, tela):
         points_x = 30 * self.tamanho
-        img_points = fonte.render(f"Score: {self.points}", True, red)
+        img_points = font.render(f"Score: {self.points}", True, red)
         tela.blit(img_points, (points_x, 50))
 
     def paint_line(self, tela, line_number, line):
@@ -109,6 +111,20 @@ class Cenario(ElementoJogo):
                 pygame.draw.circle(tela, red, (x + half, y + half), self.tamanho // 10, 0)
     
     def paint(self, tela):
+        if self.state == 0:
+            self.paint_playing(tela)
+        elif self.state == 1:
+            self.paint_playing(tela)
+            self.paint_paused(tela)
+
+    def paint_paused(self, tela):
+        img_text = font.render("P A U S A D O", True, yellow)
+        text_x = (tela.get_width() - img_text.get_width()) // 2
+        text_y = (tela.get_height() - img_text.get_height()) // 2
+        tela.blit(img_text, (text_x, text_y))
+
+
+    def paint_playing(self, tela):
         for line_number, line in enumerate(self.matriz):
             self.paint_line(tela, line_number, line)
         self.paint_points(tela)
@@ -126,6 +142,15 @@ class Cenario(ElementoJogo):
         return directions
 
     def calculate_rules(self):
+        if self.state == 0:
+            self.calculate_rules_playing()
+        elif self.state == 1:
+            self.calculate_rules_paused()
+
+    def calculate_rules_paused(self):
+        pass
+
+    def calculate_rules_playing(self):
         for movable in self.movables:
             lin = int(movable.line)
             col = int(movable.column)
@@ -147,6 +172,12 @@ class Cenario(ElementoJogo):
         for e in evts:
             if e.type == pygame.QUIT:
                 exit()
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_SPACE:
+                    if self.state == 0:
+                        self.state = 1
+                    else:
+                        self.state = 0
 
 
 class Pacman(ElementoJogo, Movivel):
