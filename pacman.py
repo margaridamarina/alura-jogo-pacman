@@ -186,7 +186,7 @@ class Cenario(ElementoJogo):
                     if isinstance(movable, Pacman) and self.matriz[lin][col] == 1:
                         self.points += 1
                         self.matriz[lin][col] = 0
-                        if self.points >= 5:
+                        if self.points >= 306:
                             self.state = 'win'
                 else: 
                     movable.refuse_move(directions)
@@ -215,6 +215,8 @@ class Pacman(ElementoJogo, Movivel):
         self.radius = self.tamanho // 2
         self.column_intention = self.column
         self.line_intention = self.line
+        self.opening = 0
+        self.speed_opening = 1
 
     def calculate_rules(self):
         self.column_intention = self.column + self.vel_x
@@ -224,12 +226,17 @@ class Pacman(ElementoJogo, Movivel):
 
     def paint(self, tela):
         #Draw pacman's body
-        pygame.draw.circle(tela, red, (self.center_x, self.center_y), self.radius)
+        pygame.draw.circle(tela, yellow, (self.center_x, self.center_y), self.radius)
 
         #Draw pacman's mouth
+        self.opening += self.speed_opening
+        if self.opening > self.radius:
+            self.speed_opening = -1
+        if self.opening <= 0:
+            self.speed_opening = 1
         canto_boca = (self.center_x, self.center_y)
-        labio_superior = (self.center_x + self.radius, self.center_y - self.radius)
-        labio_inferior = (self.center_x + self.radius, self.center_y)
+        labio_superior = (self.center_x + self.radius, self.center_y - self.opening)
+        labio_inferior = (self.center_x + self.radius, self.center_y + self.opening)
         pontos = [canto_boca, labio_superior, labio_inferior]
         pygame.draw.polygon(tela, black, pontos, 0)
 
