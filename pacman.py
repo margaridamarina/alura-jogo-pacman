@@ -57,7 +57,7 @@ class Cenario(ElementoJogo):
         self.tamanho = tamanho
         self.points = 0
         self.state = 'playing'
-        #0-Playing 1-Paused 2-GameOver 3-Win
+        self.lifes = 5
         self.matriz = [
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
             [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
@@ -93,10 +93,12 @@ class Cenario(ElementoJogo):
     def add_movable(self, obj):
         self.movables.append(obj)
 
-    def paint_points(self, tela):
+    def paint_score(self, tela):
         points_x = 30 * self.tamanho
         img_points = font.render(f"Score: {self.points}", True, red)
+        lifes_img = font.render(f"Vidas: {self.lifes}", True, red)
         tela.blit(img_points, (points_x, 50))
+        tela.blit(lifes_img, (points_x, 100))
 
     def paint_line(self, tela, line_number, line):
         for column_number, column in enumerate(line):
@@ -141,7 +143,7 @@ class Cenario(ElementoJogo):
     def paint_playing(self, tela):
         for line_number, line in enumerate(self.matriz):
             self.paint_line(tela, line_number, line)
-        self.paint_points(tela)
+        self.paint_score(tela)
 
     def get_directions(self, line, column):
         directions = []
@@ -179,7 +181,13 @@ class Cenario(ElementoJogo):
             if len(directions) >= 3:
                 movable.corner(directions)
             if isinstance(movable, Ghost) and movable.line == self.pacman.line and movable.column == self.pacman.column:
-                self.state = 'game_over'
+                self.lifes -= 1
+                if self.lifes <= 0:
+                    self.state = 'game_over'
+                else:
+                    self.pacman.line = 1
+                    self.pacman.column = 1
+
             else:
                 if 0 <= col_intention < 28 and 0 <= lin_intention < 29 and self.matriz[lin_intention][col_intention] != 2:
                     movable.accept_move()
