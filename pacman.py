@@ -56,7 +56,7 @@ class Cenario(ElementoJogo):
         self.movables = []
         self.tamanho = tamanho
         self.points = 0
-        self.state = 0
+        self.state = 'playing'
         #0-Playing 1-Paused 2-GameOver 3-Win
         self.matriz = [
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
@@ -111,9 +111,9 @@ class Cenario(ElementoJogo):
                 pygame.draw.circle(tela, red, (x + half, y + half), self.tamanho // 10, 0)
     
     def paint(self, tela):
-        if self.state == 0:
+        if self.state == 'playing':
             self.paint_playing(tela)
-        elif self.state == 1:
+        elif self.state == 'paused':
             self.paint_playing(tela)
             self.paint_paused(tela)
 
@@ -142,9 +142,9 @@ class Cenario(ElementoJogo):
         return directions
 
     def calculate_rules(self):
-        if self.state == 0:
+        if self.state == 'playing':
             self.calculate_rules_playing()
-        elif self.state == 1:
+        elif self.state == 'paused':
             self.calculate_rules_paused()
 
     def calculate_rules_paused(self):
@@ -174,10 +174,10 @@ class Cenario(ElementoJogo):
                 exit()
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_SPACE:
-                    if self.state == 0:
-                        self.state = 1
+                    if self.state == 'playing':
+                        self.state = 'paused'
                     else:
-                        self.state = 0
+                        self.state = 'playing'
 
 
 class Pacman(ElementoJogo, Movivel):
