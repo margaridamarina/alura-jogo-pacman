@@ -116,13 +116,21 @@ class Cenario(ElementoJogo):
         elif self.state == 'paused':
             self.paint_playing(tela)
             self.paint_paused(tela)
+        elif self.state == 'game_over':
+            self.paint_playing(tela)
+            self.paint_game_over(tela)
 
-    def paint_paused(self, tela):
-        img_text = font.render("P A U S A D O", True, yellow)
+    def paint_text_center(self, tela, text):
+        img_text = font.render(text, True, yellow)
         text_x = (tela.get_width() - img_text.get_width()) // 2
         text_y = (tela.get_height() - img_text.get_height()) // 2
         tela.blit(img_text, (text_x, text_y))
 
+    def paint_game_over(self, tela):
+        self.paint_text_center(tela, 'G A M E  O V E R')
+
+    def paint_paused(self, tela):
+        self.paint_text_center(tela, 'P A U S A D O')
 
     def paint_playing(self, tela):
         for line_number, line in enumerate(self.matriz):
@@ -146,8 +154,13 @@ class Cenario(ElementoJogo):
             self.calculate_rules_playing()
         elif self.state == 'paused':
             self.calculate_rules_paused()
+        elif self.state == 'game_over':
+            self.calculate_rules_game_over()
 
     def calculate_rules_paused(self):
+        pass
+
+    def calculate_rules_game_over(self):
         pass
 
     def calculate_rules_playing(self):
@@ -159,14 +172,16 @@ class Cenario(ElementoJogo):
             directions = self.get_directions(lin, col)
             if len(directions) >= 3:
                 movable.corner(directions)
-            if 0 <= col_intention < 28 and 0 <= lin_intention < 29 and self.matriz[lin_intention][col_intention] != 2:
-                movable.accept_move()
-                if isinstance(movable, Pacman) and self.matriz[lin][col] == 1:
-                    self.points += 1
-                    self.matriz[lin][col] = 0
-
-            else: 
-                movable.refuse_move(directions)
+            if isinstance(movable, Ghost) and movable.line == self.pacman.line and movable.column == self.pacman.column:
+                self.state = 'game_over'
+            else:
+                if 0 <= col_intention < 28 and 0 <= lin_intention < 29 and self.matriz[lin_intention][col_intention] != 2:
+                    movable.accept_move()
+                    if isinstance(movable, Pacman) and self.matriz[lin][col] == 1:
+                        self.points += 1
+                        self.matriz[lin][col] = 0
+                else: 
+                    movable.refuse_move(directions)
 
     def process_events(self, evts):
         for e in evts:
