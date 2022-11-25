@@ -119,6 +119,9 @@ class Cenario(ElementoJogo):
         elif self.state == 'game_over':
             self.paint_playing(tela)
             self.paint_game_over(tela)
+        elif self.state == 'win':
+            self.paint_playing(tela)
+            self.paint_win(tela)
 
     def paint_text_center(self, tela, text):
         img_text = font.render(text, True, yellow)
@@ -130,7 +133,10 @@ class Cenario(ElementoJogo):
         self.paint_text_center(tela, 'G A M E  O V E R')
 
     def paint_paused(self, tela):
-        self.paint_text_center(tela, 'P A U S A D O')
+        self.paint_text_center(tela, 'P A U S E D')
+
+    def paint_win(self, tela):
+        self.paint_text_center(tela, 'C O N G R A T U L A T I O N S , Y O U  W O N ! ! !')
 
     def paint_playing(self, tela):
         for line_number, line in enumerate(self.matriz):
@@ -180,6 +186,8 @@ class Cenario(ElementoJogo):
                     if isinstance(movable, Pacman) and self.matriz[lin][col] == 1:
                         self.points += 1
                         self.matriz[lin][col] = 0
+                        if self.points >= 5:
+                            self.state = 'win'
                 else: 
                     movable.refuse_move(directions)
 
@@ -275,8 +283,8 @@ class Pacman(ElementoJogo, Movivel):
 
 class Ghost(ElementoJogo):
     def __init__(self, color, tamanho):
-        self.column = 6.0
-        self.line = 2.0
+        self.column = 13.0
+        self.line = 15.0
         self.line_intention = self.line
         self.column_intention = self.column
         self.speed = 1
